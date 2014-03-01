@@ -8,6 +8,6 @@
     <string name="start_button">Join Class</string>
     <string name="start_token_h">Class Token</string>
     <string name="title_activity_class">ClassActivity</string>
-    <string name="title_activity_class_room">ClassRoomActivity</string>
+    <string name="title_activity_class_room">ClassRoomActivity</string><string name="start_title">Clicker-Fire</string>
 
 </resources>

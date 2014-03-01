@@ -5,42 +5,24 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
+import android.view.Window;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
-
 import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
-import org.apache.http.StatusLine;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
+import org.w3c.dom.Text;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.BufferedReader;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.TimerTask;
-import java.util.logging.Handler;
+import java.io.InputStreamReader;
+
 
 public class ClassRoomActivity extends ActionBarActivity {
 
@@ -55,6 +37,7 @@ public class ClassRoomActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         setContentView(R.layout.activity_class_room);
 
@@ -62,6 +45,11 @@ public class ClassRoomActivity extends ActionBarActivity {
 
         TextView title = (TextView) findViewById(R.id.class_title);
         title.setText(code);
+
+        lastSeekVal = 50;
+
+        TextView counter = (TextView) findViewById(R.id.class_score_counter);
+        counter.setText(Integer.toString(lastSeekVal));
 
         // Set up progress bar
         progressBar = (ProgressBar) findViewById(R.id.class_start_bar);
@@ -81,8 +69,8 @@ public class ClassRoomActivity extends ActionBarActivity {
 
         // set up seekbar
         SeekBar seek = (SeekBar) findViewById(R.id.class_seek_bar);
-        lastSeekVal = 50;
         seek.setProgress(lastSeekVal);
+
         seek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar arg0, int arg1, boolean arg2) {
@@ -127,12 +115,53 @@ public class ClassRoomActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void postScore(int score, String id, String code) {
-        Toast.makeText(ClassRoomActivity.this, score, Toast.LENGTH_LONG).show();
+    public void postScore(int score, String id, String code)
+    {
+        TextView counter = (TextView) findViewById(R.id.class_score_counter);
+        counter.setText(Integer.toString(score));
+        postScoreTask postScore = new postScoreTask();
+        String[] params = new String[1];
+        params[0] = "http://clickerfire.herokuapp.com/event?event="+code+"&uid="+id+"&score="+score;
+        postScore.execute(params);
     }
 
     public void updateProgressBar(int value)
     {
         progressBar.setProgress(value);
+    }
+
+    protected class postScoreTask extends AsyncTask<String, Void, String>
+    {
+        @Override
+        protected String doInBackground(String... params)
+        {
+			String url = params[0];
+            String response = "";
+			/* Download your data here. */
+            DefaultHttpClient client = new DefaultHttpClient();
+            HttpGet httpGet = new HttpGet(url);
+            try
+            {
+                HttpResponse execute = client.execute(httpGet);
+                InputStream content = execute.getEntity().getContent();
+
+                BufferedReader buffer = new BufferedReader(new InputStreamReader(content));
+                String s = "";
+                while ((s = buffer.readLine()) != null)
+                {
+                    response += s;
+                }
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+
+            return response;
+        }
+
+        protected void onPostExecute(String response)
+        {
+        }
     }
 }

@@ -1,36 +1,16 @@
 package alpha.helix.bar;
 
-import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.nfc.Tag;
-import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.EditText;
 import android.widget.Toast;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-
-import android.provider.Settings.Secure;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 
 public class StartActivity extends ActionBarActivity {
    final String android_id =  "SECRET_KEY_1";//Secure.getString(getContentResolver(), Secure.ANDROID_ID).toString();
@@ -38,6 +18,7 @@ public class StartActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_start);
     }
 
@@ -87,27 +68,5 @@ public class StartActivity extends ActionBarActivity {
         } else {
             return false;
         }
-    }
-
-    public HttpResponse postSession(String code, String id) {
-        // Create a new HttpClient and Post Header
-        HttpClient httpclient = new DefaultHttpClient();
-        HttpPost httppost = new HttpPost("http://www.yoursite.com/");
-        HttpResponse response = null;
-
-        try {
-            // Execute HTTP Post Request
-            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-            nameValuePairs.add(new BasicNameValuePair("event", code));
-            nameValuePairs.add(new BasicNameValuePair("uid", id));
-            httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-            response = httpclient.execute(httppost);
-
-        } catch (ClientProtocolException e) {
-            // TODO Auto-generated catch block
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-        }
-        return response;
     }
 }
