@@ -33,8 +33,7 @@ import java.util.List;
 
 
 public class StartActivity extends ActionBarActivity {
-    final TelephonyManager tm = (TelephonyManager) getBaseContext().getSystemService(Context.TELEPHONY_SERVICE);
-    final String android_id =  tm.getDeviceId().toString();
+   final String android_id =  "SECRET_KEY_1";//Secure.getString(getContentResolver(), Secure.ANDROID_ID).toString();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
