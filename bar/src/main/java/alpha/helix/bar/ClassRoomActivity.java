@@ -1,5 +1,6 @@
 package alpha.helix.bar;
 
+import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -16,15 +17,26 @@ import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
+import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimerTask;
@@ -34,7 +46,7 @@ public class ClassRoomActivity extends ActionBarActivity {
 
     private int lastSeekVal;
     private int consensusScore;
-    private Firer fire;
+    public Firebase fire;
     private ValueEventListener handler;
     private String eventCode;
     private ProgressBar progressBar;
@@ -48,15 +60,24 @@ public class ClassRoomActivity extends ActionBarActivity {
 
         final String code = getIntent().getStringExtra("code");
 
-        fire = new Firer(code);
-
         TextView title = (TextView) findViewById(R.id.class_title);
         title.setText(code);
 
         // Set up progress bar
-        // TODO get init from firebaseString code, String id
         progressBar = (ProgressBar) findViewById(R.id.class_start_bar);
-        progressBar.setProgress(50);
+
+        fire = new Firebase("https://blistering-fire-5490.firebaseIO.com/class/"+code+"/score");
+        fire.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                updateProgressBar(dataSnapshot.getValue(int.class));
+            }
+
+            @Override
+            public void onCancelled(FirebaseError error) {
+
+            }
+        });
 
         // set up seekbar
         SeekBar seek = (SeekBar) findViewById(R.id.class_seek_bar);
@@ -106,32 +127,12 @@ public class ClassRoomActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public HttpResponse postScore(int score, String id, String code) {
-        // Create a new HttpClient and Post Header
-        HttpClient httpclient = new DefaultHttpClient();
-        HttpPost httppost = new HttpPost("http://www.yoursite.com/");
-        HttpResponse response = null;
-        String scoreString = Integer.toString(score);
-
-        try {
-            // Execute HTTP Post Request
-            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(3);
-            nameValuePairs.add(new BasicNameValuePair("event", code));
-            nameValuePairs.add(new BasicNameValuePair("uid", id));
-            nameValuePairs.add(new BasicNameValuePair("score", scoreString));
-            httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-            response = httpclient.execute(httppost);
-
-        } catch (ClientProtocolException e) {
-            // TODO Auto-generated catch block
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-        }
-        return response;
+    public void postScore(int score, String id, String code) {
+        Toast.makeText(ClassRoomActivity.this, score, Toast.LENGTH_LONG).show();
     }
-    public void updateProgressBar(String val)
+
+    public void updateProgressBar(int value)
     {
-        Toast.makeText(ClassRoomActivity.this, "val", Toast.LENGTH_LONG ).show();
+        progressBar.setProgress(value);
     }
-
 }
